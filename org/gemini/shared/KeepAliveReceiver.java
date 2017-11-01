@@ -8,22 +8,40 @@ import android.net.Uri;
 public class KeepAliveReceiver extends BroadcastReceiver {
   @Override
   public void onReceive(Context context, Intent intent) {
-    context.startService(serviceIntent(context));
+    if (intent != null) {
+      context.startService(serviceIntent(context, intent));
+    }
   }
 
-  protected Intent serviceIntent(Context context) {
-    return new Intent(serviceAction(),
-                      serviceUri(),
+  protected Intent serviceIntent(Context context, Intent intent) {
+    return new Intent(serviceAction(intent),
+                      serviceUri(intent),
                       context,
-                      serviceClass());
+                      serviceClass(intent));
+  }
+
+  protected String serviceAction(Intent intent) {
+    String action = serviceAction();
+    if (action == null) {
+      action = intent.getAction();
+    }
+    return action;
   }
 
   protected String serviceAction() {
-    return KeepAliveService.KEEP_ALIVE;
+    return null;
+  }
+
+  protected Uri serviceUri(Intent intent) {
+    return serviceUri();
   }
 
   protected Uri serviceUri() {
     return Uri.EMPTY;
+  }
+
+  protected Class<?> serviceClass(Intent intent) {
+    return serviceClass();
   }
 
   protected Class<?> serviceClass() {

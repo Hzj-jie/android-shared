@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class KeepAliveService extends Service {
-  public static final String KEEP_ALIVE = "org.gemini.shared.intent.KEEP_ALIVE";
+  public static final String RESTART = "org.gemini.shared.intent.RESTART";
   private final List<Integer> stickies;
 
   public KeepAliveService() {
@@ -43,16 +43,35 @@ public class KeepAliveService extends Service {
 
   @Override
   public int onStartCommand(Intent intent, int flags, int startId) {
-    if (intent !=null &&
-        intent.getAction().equals(KEEP_ALIVE) &&
-        stickies.isEmpty()) {
-      keepAlive(stickies.size());
+    if (intent !=null) {
+      if (stickies.isEmpty()) {
+        firstStart(intent);
+      }
+      keepAlive(intent, stickies.size());
       return sticky(startId);
     }
     return discardCommand(startId);
   }
 
+  protected void keepAlive(Intent intent, int index) {
+    keepAlive(intent.getAction(), index);
+  }
+
+  protected void keepAlive(String action, int index) {
+    keepAlive(index);
+  }
+
   protected void keepAlive(int index) {}
+
+  protected void firstStart(Intent intent) {
+    firstStart(intent.getAction());
+  }
+
+  protected void firstStart(String action) {
+    firstStart();
+  }
+
+  protected void firstStart() {}
 
   protected final int discardCommand(int startId) {
     stopSelf(startId);
@@ -72,14 +91,16 @@ public class KeepAliveService extends Service {
   }
 
   private final void restart() {
-    Intent intent = new Intent(getApplicationContext(), this.getClass());
-    intent.setAction(KEEP_ALIVE);
-    PendingIntent pendingIntent =
-        PendingIntent.getService(this, 1, intent, PendingIntent.FLAG_ONE_SHOT);
-    AlarmManager alarmManager =
-        (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-    alarmManager.set(AlarmManager.RTC_WAKEUP,
-                     SystemClock.elapsedRealtime() + 1000,
-                     pendingIntent);
+    if (!stickies.isEmpty()) {
+      Intent intent = new Intent(getApplicationContext(), this.getClass());
+      intent.setAction(RESTART);
+      PendingIntent pendingIntent = PendingIntent.getService(
+          this, 1, intent, PendingIntent.FLAG_ONE_SHOT);
+      AlarmManager alarmManager =
+          (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+      alarmManager.set(AlarmManager.RTC_WAKEUP,
+                       SystemClock.elapsedRealtime() + 1000,
+                       pendingIntent);
+    }
   }
 }
