@@ -68,6 +68,7 @@ public class KeepAliveService extends Service {
     for (Integer i : stickies) {
       stopSelf(i);
     }
+    stickies.clear();
   }
 
   private final void restart() {
