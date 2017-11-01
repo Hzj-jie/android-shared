@@ -19,8 +19,7 @@ public class KeepAliveReceiver extends BroadcastReceiver {
   }
 
   protected String serviceAction() {
-    assert(false);
-    return null;
+    return KeepAliveService.KEEP_ALIVE;
   }
 
   protected Uri serviceUri() {
