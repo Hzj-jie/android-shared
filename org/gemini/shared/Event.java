@@ -97,8 +97,8 @@ public class Event<ParamT> {
     private SelfRemovableParameterRunnable(Event<ParamT> owner,
                          ParameterCallback<Boolean, ParamT> callback) {
       assert(callback != null);
-      callback = callback;
-      owner = owner;
+      this.callback = callback;
+      this.owner = owner;
       lock = new Object();
       synchronized (lock) {
         event = owner.add(this);

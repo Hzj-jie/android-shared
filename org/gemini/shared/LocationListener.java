@@ -8,10 +8,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class LocationListener {
-  private final Event<Location>.Raisable onLocationChanged;
-  private final Event<Void>.Raisable onProviderDisabled;
-  private final Event<Void>.Raisable onProviderEnabled;
-  private final Event<Integer>.Raisable onStatusChanged;
+  private final Event.Raisable<Location> onLocationChanged;
+  private final Event.Raisable<Void> onProviderDisabled;
+  private final Event.Raisable<Void> onProviderEnabled;
+  private final Event.Raisable<Integer> onStatusChanged;
   private final Listener listener;
 
   public class Configuration {
@@ -28,10 +28,10 @@ public class LocationListener {
   }
 
   public LocationListener(Configuration config) {
-    onLocationChanged = new Event<Location>.Raisable();
-    onProviderDisabled = new Event<Void>.Raisable();
-    onProviderEnabled = new Event<Void>.Raisable();
-    onStatusChanged = new Event<Integer>.Raisable();
+    onLocationChanged = new Event.Raisable<>();
+    onProviderDisabled = new Event.Raisable<>();
+    onProviderEnabled = new Event.Raisable<>();
+    onStatusChanged = new Event.Raisable<>();
     listener = new Listener(this);
 
     assert(config != null);
@@ -80,7 +80,7 @@ public class LocationListener {
 
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {
-      owner.onStatusChanged(status);
+      owner.onStatusChanged.raise(status);
     }
   }
 }

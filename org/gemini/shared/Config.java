@@ -47,7 +47,7 @@ public final class Config {
 
   private Config(Context context, String filename, Map<String, String> fields) {
     assert(context != null);
-    assert(filename != null && !filename.isEmpty());
+    assert(filename != null && filename.length() > 0);
     assert(fields != null);
     this.context = context;
     this.filename = filename;
@@ -60,8 +60,8 @@ public final class Config {
 
   private static boolean isValidValue(String value) {
     return value != null &&
-           !value.isEmpty() &&
-           !value.contains(System.lineSeparator());
+           value.length() > 0 &&
+           !value.contains(Constants.lineSeparator());
   }
 
   // Returns null if |key| does not exist in |fields|.
@@ -87,14 +87,14 @@ public final class Config {
         String value = entry.getValue();
         assert(isValidKey(key));
         assert(isValidValue(value));
-        String line = key + SEPARATOR + value + System.lineSeparator();
+        String line = key + SEPARATOR + value + Constants.lineSeparator();
         writer.write(line, 0, line.length());
       }
       writer.flush();
       writer.close();
     } catch (Exception e) {
       // TODO
-      e.printStackTrace()
+      e.printStackTrace();
       assert(false);
     }
   }

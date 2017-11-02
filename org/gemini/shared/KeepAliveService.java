@@ -7,16 +7,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
 import android.os.SystemClock;
-import java.util.ArrayList;
-import java.util.List;
+import android.util.Log;
 
 public class KeepAliveService extends Service {
   public static final String RESTART = "org.gemini.shared.intent.RESTART";
-  private final List<Integer> stickies;
-
-  public KeepAliveService() {
-    stickies = new ArrayList<>();
-  }
+  private static final String TAG = "[KeepAliveService]";
+  private int commandCount = 0;
+  private boolean sticked = false;
 
   @Override
   public IBinder onBind(Intent intent) {
@@ -25,12 +22,14 @@ public class KeepAliveService extends Service {
 
   @Override
   public void onDestroy() {
+    Debugging.printStackTrace();
     restart();
     super.onDestroy();
   }
 
   @Override
   public void onTaskRemoved(Intent rootIntent) {
+    Debugging.printStackTrace();
     restart();
     super.onTaskRemoved(rootIntent);
   }
@@ -42,56 +41,33 @@ public class KeepAliveService extends Service {
   }
 
   @Override
-  public int onStartCommand(Intent intent, int flags, int startId) {
-    if (intent !=null) {
-      if (stickies.isEmpty()) {
-        firstStart(intent);
+  public final int onStartCommand(Intent intent, int flags, int startId) {
+    if (intent != null) {
+      Log.i(TAG, "Receive command " + intent.getAction());
+      if (intent.getAction() == Intent.ACTION_BOOT_COMPLETED) {
+        onBootCompleted();
+        onStart();
+      } else if (intent.getAction() == RESTART) {
+        onRestart();
+        onStart();
       }
-      keepAlive(intent, stickies.size());
-      return sticky(startId);
+      process(intent, commandCount);
+      commandCount++;
+      if (!sticked) {
+        sticked = true;
+        return START_STICKY;
+      }
     }
-    return discardCommand(startId);
-  }
-
-  protected void keepAlive(Intent intent, int index) {
-    keepAlive(intent.getAction(), index);
-  }
-
-  protected void keepAlive(String action, int index) {
-    keepAlive(index);
-  }
-
-  protected void keepAlive(int index) {}
-
-  protected void firstStart(Intent intent) {
-    firstStart(intent.getAction());
-  }
-
-  protected void firstStart(String action) {
-    firstStart();
-  }
-
-  protected void firstStart() {}
-
-  protected final int discardCommand(int startId) {
-    stopSelf(startId);
     return START_NOT_STICKY;
   }
-
-  protected final int sticky(int startId) {
-    stickies.add(startId);
-    return START_STICKY;
-  }
-
-  protected final void stopStickies() {
-    for (Integer i : stickies) {
-      stopSelf(i);
-    }
-    stickies.clear();
+  
+  protected final void stopSticky() {
+    sticked = false;
+    stopSelf();
   }
 
   private final void restart() {
-    if (!stickies.isEmpty()) {
+    if (sticked) {
       Intent intent = new Intent(getApplicationContext(), this.getClass());
       intent.setAction(RESTART);
       PendingIntent pendingIntent = PendingIntent.getService(
@@ -103,4 +79,22 @@ public class KeepAliveService extends Service {
                        pendingIntent);
     }
   }
+
+  protected void process(Intent intent, int index) {
+    process(intent.getAction(), index);
+  }
+
+  protected void process(String action, int index) {
+    process(action);
+  }
+
+  protected void process(String action) {
+    process();
+  }
+
+  protected void process() {}
+
+  protected void onBootCompleted() {}
+  protected void onRestart() {}
+  protected void onStart() {}
 }
