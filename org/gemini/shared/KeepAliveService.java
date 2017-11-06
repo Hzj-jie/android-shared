@@ -46,7 +46,9 @@ public class KeepAliveService extends Service {
                (intent == null ? "null" : intent.getAction()));
     if (intent == null) {
       onSystemRestart();
+      onRestart();
     } else if (intent.getAction() == RESTART) {
+      onKeepAliveRestart();
       onRestart();
     } else if (intent.getAction() == Intent.ACTION_BOOT_COMPLETED) {
       onBootCompleted();
@@ -101,5 +103,6 @@ public class KeepAliveService extends Service {
   protected void onBootCompleted() {}
   protected void onRestart() {}
   protected void onSystemRestart() {}
+  protected void onKeepAliveRestart() {}
   protected void onStart() {}
 }
