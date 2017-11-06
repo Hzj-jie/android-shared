@@ -11,7 +11,7 @@ import android.util.Log;
 
 public class KeepAliveService extends Service {
   public static final String RESTART = "org.gemini.shared.intent.RESTART";
-  private static final String TAG = "[KeepAliveService]";
+  private static final String TAG = "Gemini.KeepAliveService";
   private int commandCount = 0;
   private boolean sticked = false;
 
@@ -42,21 +42,23 @@ public class KeepAliveService extends Service {
 
   @Override
   public final int onStartCommand(Intent intent, int flags, int startId) {
-    if (intent != null) {
-      Log.i(TAG, "Receive command " + intent.getAction());
-      if (intent.getAction() == Intent.ACTION_BOOT_COMPLETED) {
-        onBootCompleted();
-        onStart();
-      } else if (intent.getAction() == RESTART) {
-        onRestart();
-        onStart();
-      }
-      process(intent, commandCount);
-      commandCount++;
-      if (!sticked) {
-        sticked = true;
-        return START_STICKY;
-      }
+    Log.i(TAG, "Receive command " +
+               (intent == null ? "null" : intent.getAction()));
+    if (intent == null) {
+      onSystemRestart();
+    } else if (intent.getAction() == RESTART) {
+      onRestart();
+    } else if (intent.getAction() == Intent.ACTION_BOOT_COMPLETED) {
+      onBootCompleted();
+    }
+    if (commandCount == 0) {
+      onStart();
+    }
+    process(intent, commandCount);
+    commandCount++;
+    if (!sticked) {
+      sticked = true;
+      return START_STICKY;
     }
     return START_NOT_STICKY;
   }
@@ -81,7 +83,9 @@ public class KeepAliveService extends Service {
   }
 
   protected void process(Intent intent, int index) {
-    process(intent.getAction(), index);
+    if (intent != null) {
+      process(intent.getAction(), index);
+    }
   }
 
   protected void process(String action, int index) {
@@ -96,5 +100,6 @@ public class KeepAliveService extends Service {
 
   protected void onBootCompleted() {}
   protected void onRestart() {}
+  protected void onSystemRestart() {}
   protected void onStart() {}
 }

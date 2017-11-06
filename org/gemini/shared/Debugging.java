@@ -1,9 +1,11 @@
 package org.gemini.shared;
 
 import android.util.Log;
+import java.text.DateFormat;
+import java.util.Date;
 
 public final class Debugging {
-  private static final String TAG = "[Debugging]";
+  private static final String TAG = "Gemini.Debugging";
   private Debugging() {}
 
   public static String stackTrace() {
@@ -16,5 +18,9 @@ public final class Debugging {
 
   public static void printStackTrace() {
     printStackTrace(TAG);
+  }
+
+  public static String currentTime() {
+    return DateFormat.getDateTimeInstance().format(new Date());
   }
 }

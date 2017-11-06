@@ -7,7 +7,7 @@ import android.os.Bundle;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LocationListener {
+public final class LocationListener {
   private final Event.Raisable<Location> onLocationChanged;
   private final Event.Raisable<Void> onProviderDisabled;
   private final Event.Raisable<Void> onProviderEnabled;
@@ -39,19 +39,19 @@ public class LocationListener {
     // TODO
   }
 
-  public final Event<Location> onLocationChanged() {
+  public Event<Location> onLocationChanged() {
     return onLocationChanged;
   }
 
-  public final Event<Void> onProviderDisabled() {
+  public Event<Void> onProviderDisabled() {
     return onProviderDisabled;
   }
 
-  public final Event<Void> onProviderEnabled() {
+  public Event<Void> onProviderEnabled() {
     return onProviderEnabled;
   }
 
-  public final Event<Integer> onStatusChanged() {
+  public Event<Integer> onStatusChanged() {
     return onStatusChanged;
   }
 
