@@ -11,7 +11,7 @@ import android.util.Log;
 
 public class KeepAliveService extends Service {
   public static final String RESTART = "org.gemini.shared.intent.RESTART";
-  private static final String TAG = "Gemini.KeepAliveService";
+  private static final String TAG = Debugging.createTag("KeepAliveService");
   private int commandCount = 0;
   private boolean sticked = false;
 

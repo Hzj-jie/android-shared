@@ -6,7 +6,7 @@ import android.util.Log;
 import java.lang.reflect.Method;
 
 public final class TelephonyState {
-  private static final String TAG = "Gemini.TelephonyState";
+  private static final String TAG = Debugging.createTag("TelephonyState");
   private final Context context;
 
   public TelephonyState(Context context) {
