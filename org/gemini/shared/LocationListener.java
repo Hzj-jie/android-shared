@@ -148,7 +148,7 @@ public final class LocationListener {
     @Override
     public void onLocationChanged(Location location) {
       if (location != null) {
-        Log.i(TAG, "Get location changed event: X: " + location.getLongitude() +
+        Log.d(TAG, "Get location changed event: X: " + location.getLongitude() +
                    ", Y: " + location.getLatitude());
         owner.onLocationChanged.raise(location);
       }

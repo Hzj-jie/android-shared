@@ -17,4 +17,20 @@ public final class Preconditions {
   public static boolean isTrue(boolean v) {
     return isTrue(v, null);
   }
+
+  public static boolean isNull(Object v, String msg) {
+    return isTrue(v == null, msg);
+  }
+
+  public static boolean isNull(Object v) {
+    return isTrue(v == null);
+  }
+
+  public static boolean isNotNull(Object v, String msg) {
+    return isTrue(v != null, msg);
+  }
+
+  public static boolean isNotNull(Object v) {
+    return isTrue(v != null);
+  }
 }
