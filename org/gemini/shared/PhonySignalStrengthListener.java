@@ -14,7 +14,7 @@ public final class PhonySignalStrengthListener {
   private static final String TAG =
       Debugging.createTag("PhonySignalStrengthListener");
   private final Context context;
-  private final Event.Raisable<Integer> onSignalStrength;
+  private final Event.PromisedRaisable<Integer> onSignalStrength;
   private final Listener listener;
 
   @SuppressWarnings("deprecation")
@@ -22,7 +22,7 @@ public final class PhonySignalStrengthListener {
   public PhonySignalStrengthListener(Context context) {
     assert(context != null);
     this.context = context;
-    onSignalStrength = new Event.Raisable<>();
+    onSignalStrength = new Event.PromisedRaisable<>();
     listener = new Listener(this);
     manager().listen(listener,
                      PhoneStateListener.LISTEN_SIGNAL_STRENGTH |
