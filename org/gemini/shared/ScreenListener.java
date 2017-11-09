@@ -59,7 +59,7 @@ public final class ScreenListener {
     @Override
     public void onReceive(Context context, Intent intent) {
       if (intent == null) return;
-      Log.d(TAG, "Receive action " + intent.getAction());
+      Log.i(TAG, "Receive action " + intent.getAction());
       if (Intent.ACTION_SCREEN_ON.equals(intent.getAction())) {
         owner.onScreenOn.raise(null);
       } else if (Intent.ACTION_SCREEN_OFF.equals(intent.getAction())) {

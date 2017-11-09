@@ -54,7 +54,7 @@ public final class PhonySignalStrengthListener {
     public void onSignalStrengthsChanged(SignalStrength signalStrength) {
       if (signalStrength == null) return;
       if (Build.VERSION.SDK_INT < Build.VERSION_CODES.ECLAIR_MR1) return;
-      Log.d(TAG, "Received signal strength in SignalStrength " +
+      Log.i(TAG, "Received signal strength in SignalStrength " +
                  signalStrength.toString());
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
         raise(signalStrength.getLevel());
@@ -100,7 +100,7 @@ public final class PhonySignalStrengthListener {
     @TargetApi(7)
     public void onSignalStrengthChanged(int asu) {
       if (Build.VERSION.SDK_INT < Build.VERSION_CODES.ECLAIR_MR1) {
-        Log.d(TAG, "Received signal strength in asu " + asu);
+        Log.i(TAG, "Received signal strength in asu " + asu);
         raise(asuToLevel(asu));
       }
       super.onSignalStrengthChanged(asu);

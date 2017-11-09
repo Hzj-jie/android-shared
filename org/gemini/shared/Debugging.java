@@ -27,7 +27,7 @@ public final class Debugging {
   }
 
   public static void printStackTrace(String tag) {
-    Log.d(tag, stackTrace());
+    Log.i(tag, stackTrace());
   }
 
   public static void printStackTrace() {

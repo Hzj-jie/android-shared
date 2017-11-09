@@ -130,7 +130,7 @@ public final class NetworkListener {
     public void onReceive(Context context, Intent intent) {
       if (context == null) return;
       if (intent == null) return;
-      Log.d(TAG, "Receive action " + intent.getAction());
+      Log.i(TAG, "Receive action " + intent.getAction());
       owner.raise();
     }
   }

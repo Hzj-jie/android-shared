@@ -15,7 +15,7 @@ public class KeepAliveService extends Service {
   private static final String QUICK_POWER_ON =
       "android.intent.action.QUICKBOOT_POWERON";
   private int commandCount = 0;
-  private boolean sticked = false;
+  private boolean stopped = false;
 
   @Override
   public IBinder onBind(Intent intent) {
@@ -45,7 +45,7 @@ public class KeepAliveService extends Service {
   @Override
   public final int onStartCommand(Intent intent, int flags, int startId) {
     Log.i(TAG, "Receive command " +
-               (intent == null ? "null" : intent.getAction()));
+               (intent == null ? "[null intent]" : intent.getAction()));
     if (intent == null) {
       onSystemRestart();
       onRestart();
@@ -61,20 +61,19 @@ public class KeepAliveService extends Service {
     }
     process(intent, commandCount);
     commandCount++;
-    if (!sticked) {
-      sticked = true;
+    if (commandCount == 1) {
       return START_STICKY;
     }
     return START_NOT_STICKY;
   }
   
   protected final void stopSticky() {
-    sticked = false;
+    stopped = true;
     stopSelf();
   }
 
   private final void restart() {
-    if (sticked) {
+    if (!stopped) {
       Intent intent = new Intent(getApplicationContext(), this.getClass());
       intent.setAction(RESTART);
       PendingIntent pendingIntent = PendingIntent.getService(
@@ -88,9 +87,7 @@ public class KeepAliveService extends Service {
   }
 
   protected void process(Intent intent, int index) {
-    if (intent != null) {
-      process(intent.getAction(), index);
-    }
+    process(intent == null ? null : intent.getAction(), index);
   }
 
   protected void process(String action, int index) {
