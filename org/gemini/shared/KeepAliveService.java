@@ -65,6 +65,7 @@ public class KeepAliveService extends Service {
                  QUICK_POWER_ON.equals(intent.getAction())) {
         onBootCompleted();
       }
+      keepalive();
     } else if (RESTART.equals(intent.getAction())) {
       keepalive();
       return START_NOT_STICKY;
