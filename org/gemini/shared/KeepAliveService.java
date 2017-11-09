@@ -12,6 +12,8 @@ import android.util.Log;
 public class KeepAliveService extends Service {
   public static final String RESTART = "org.gemini.shared.intent.RESTART";
   private static final String TAG = Debugging.createTag("KeepAliveService");
+  private static final String QUICK_POWER_ON =
+      "android.intent.action.QUICKBOOT_POWERON";
   private int commandCount = 0;
   private boolean sticked = false;
 
@@ -47,10 +49,11 @@ public class KeepAliveService extends Service {
     if (intent == null) {
       onSystemRestart();
       onRestart();
-    } else if (intent.getAction() == RESTART) {
+    } else if (RESTART.equals(intent.getAction())) {
       onKeepAliveRestart();
       onRestart();
-    } else if (intent.getAction() == Intent.ACTION_BOOT_COMPLETED) {
+    } else if (Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction()) ||
+               QUICK_POWER_ON.equals(intent.getAction())) {
       onBootCompleted();
     }
     if (commandCount == 0) {
