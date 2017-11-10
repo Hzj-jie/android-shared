@@ -1,7 +1,5 @@
 package org.gemini.shared;
 
-import android.os.Handler;
-import android.os.Looper;
 import java.util.HashSet;
 
 public class Event<ParamT> {
@@ -53,19 +51,18 @@ public class Event<ParamT> {
       if (result != null) {
         synchronized (callbacks) {
           if (raised) {
-            if (Looper.myLooper() == null) {
-              runnable.run(lastParameter);
-            } else {
+            if (ThisThread.postable()) {
               // We should always use the latest parameter, otherwise the order
               // of parameters current runnable gets may not be correct.
               final PromisedRaisable<ParamT> me = this;
-              Handler h = new Handler(Looper.myLooper());
-              h.post(new Runnable() {
+              ThisThread.post(new Runnable() {
                 @Override
                 public void run() {
                   runnable.run(me.lastParameter);
                 }
               });
+            } else {
+              runnable.run(lastParameter);
             }
           }
         }

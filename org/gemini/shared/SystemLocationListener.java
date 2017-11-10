@@ -118,7 +118,7 @@ public final class SystemLocationListener extends LocationListener {
     private final SystemLocationListener owner;
 
     public Listener(SystemLocationListener owner) {
-      assert(owner != null);
+      Preconditions.isNotNull(owner);
       this.owner = owner;
     }
 
