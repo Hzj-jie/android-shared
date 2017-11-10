@@ -2,6 +2,7 @@ package org.gemini.shared;
 
 import android.content.Context;
 import android.location.Location;
+import android.util.Log;
 
 public final class FusedLocationListener extends LocationListener {
   private static final String TAG =
@@ -48,9 +49,13 @@ public final class FusedLocationListener extends LocationListener {
   }
 
   private void pollGps(final int timeoutMs, final float acceptableErrorMeter) {
-    if (mostAccurate() == null ||
-        mostAccurate().getAccuracy() > acceptableErrorMeter ||
-        System.currentTimeMillis() - mostAccurate().getTime() > timeoutMs) {
+    if (!isLocationQualified(mostAccurate(), timeoutMs, acceptableErrorMeter) &&
+        !isLocationQualified(latest(), timeoutMs, acceptableErrorMeter)) {
+      Log.w(TAG, "No qualified location updates received, " +
+                 "actively request GPS update. Most Accurate: " +
+                 mostAccurate().toString() +
+                 ", Latest: " +
+                 latest().toString());
       gps.requestOnce();
     }
 
@@ -63,6 +68,14 @@ public final class FusedLocationListener extends LocationListener {
           }
         },
         timeoutMs);
+  }
+
+  private static boolean isLocationQualified(Location location,
+                                             int timeoutMs,
+                                             float acceptableErrorMeter) {
+    return location != null &&
+           System.currentTimeMillis() - location.getTime() < timeoutMs &&
+           location.getAccuracy() <= acceptableErrorMeter;
   }
 
   private static void copyConfig(SystemLocationListener.Configuration dst,
