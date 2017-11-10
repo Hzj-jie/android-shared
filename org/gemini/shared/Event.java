@@ -89,8 +89,9 @@ public class Event<ParamT> {
     private final ParameterCallback<Boolean, ParamT> callback;
     private final Event<ParamT> owner;
 
-    // This lock is used to make sure event is correctly set before remove in
-    // run function. i.e. owner.add and assigment of event need to be atomic.
+    // This lock is used to make sure event is correctly set before removing in
+    // run() function. i.e. owner.add() and assigment of event need to be
+    // atomic.
     private final Object lock;
     private final Object event;
 
@@ -144,6 +145,17 @@ public class Event<ParamT> {
     // need to have a reference of this instance, but all the logic is in new
     // function.
     new SelfRemovableParameterRunnable<ParamT>(this, callback);
+  }
+
+  public void addOnce(final ParameterRunnable<ParamT> callback) {
+    Preconditions.isNotNull(callback);
+    addSelfRemovable(new ParameterCallback<Boolean, ParamT>() {
+      @Override
+      public boolean run(ParamT param) {
+        callback.run(param);
+        return false;
+      }
+    });
   }
 
   // Removes a callback / handler from the Event.

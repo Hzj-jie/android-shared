@@ -11,10 +11,12 @@ import java.util.List;
 public final class SystemLocationListener extends LocationListener {
   private static final String TAG =
       Debugging.createTag("SystemLocationListener");
+  private final Configuration config;
   private final Event.Raisable<Void> onProviderDisabled;
   private final Event.Raisable<Void> onProviderEnabled;
   private final Event.Raisable<Integer> onStatusChanged;
   private final Listener listener;
+  private boolean started = false;
 
   public static final class Configuration {
     public Context context = null;
@@ -22,6 +24,7 @@ public final class SystemLocationListener extends LocationListener {
     public int timeoutMs = 300000;
     public float distanceMeter = 10;
     public String provider;
+    public boolean autoStart = true;
 
     public Configuration() {
       network();
@@ -42,17 +45,13 @@ public final class SystemLocationListener extends LocationListener {
 
   public SystemLocationListener(Configuration config) {
     super(config.context, config.timeoutMs);
+    this.config = config;
     onProviderDisabled = new Event.Raisable<>();
     onProviderEnabled = new Event.Raisable<>();
     onStatusChanged = new Event.Raisable<>();
     listener = new Listener(this);
-
-    try {
-      manager().requestLocationUpdates(
-          config.provider, config.intervalMs, config.distanceMeter, listener);
-    } catch (Exception e) {
-      Log.e(TAG, "Failed to request location updates from provider " +
-                 config.provider + ": " + e.toString());
+    if (config.autoStart) {
+      start();
     }
 
     Location last = null;
@@ -68,8 +67,34 @@ public final class SystemLocationListener extends LocationListener {
     }
   }
 
+  public void start() {
+    if (started) return;
+    try {
+      manager().requestLocationUpdates(
+          config.provider, config.intervalMs, config.distanceMeter, listener);
+      started = true;
+    } catch (Exception e) {
+      Log.e(TAG, "Failed to request location updates from provider " +
+                 config.provider + ": " + e.toString());
+    }
+  }
+
   public void stop() {
+    if (!started) return;
     manager().removeUpdates(listener);
+    started = false;
+  }
+
+  public void requestOnce() {
+    if (started) return;
+    onLocationChanged().addOnce(
+        new Event.ParameterRunnable<Location>() {
+          @Override
+          public void run(Location location) {
+            stop();
+          }
+        });
+    start();
   }
 
   public Event<Void> onProviderDisabled() {
