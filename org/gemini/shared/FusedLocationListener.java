@@ -47,9 +47,10 @@ public final class FusedLocationListener extends LocationListener {
     });
   }
 
-  private void pollGps(final int delayMs, final float acceptableErrorMeter) {
+  private void pollGps(final int timeoutMs, final float acceptableErrorMeter) {
     if (mostAccurate() == null ||
-        mostAccurate().getAccuracy() > acceptableErrorMeter) {
+        mostAccurate().getAccuracy() > acceptableErrorMeter ||
+        System.currentTimeMillis() - mostAccurate().getTime() > timeoutMs) {
       gps.requestOnce();
     }
 
@@ -58,10 +59,10 @@ public final class FusedLocationListener extends LocationListener {
         new Runnable() {
           @Override
           public void run() {
-            me.pollGps(delayMs, acceptableErrorMeter);
+            me.pollGps(timeoutMs, acceptableErrorMeter);
           }
         },
-        delayMs);
+        timeoutMs);
   }
 
   private static void copyConfig(SystemLocationListener.Configuration dst,
