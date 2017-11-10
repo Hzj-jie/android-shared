@@ -54,11 +54,10 @@ public class Event<ParamT> {
             if (ThisThread.postable()) {
               // We should always use the latest parameter, otherwise the order
               // of parameters current runnable gets may not be correct.
-              final PromisedRaisable<ParamT> me = this;
               ThisThread.post(new Runnable() {
                 @Override
                 public void run() {
-                  runnable.run(me.lastParameter);
+                  runnable.run(lastParameter);
                 }
               });
             } else {

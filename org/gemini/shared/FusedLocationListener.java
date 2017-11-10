@@ -13,9 +13,14 @@ public final class FusedLocationListener extends LocationListener {
 
   public static final class Configuration {
     public Context context = null;
+    // See SystemLocationListener.Configuration.intervalMs.
     public int intervalMs = 30000;
+    // See LocationListener.timeoutMs and
+    // SystemLocationListener.Configuration.timeoutMs.
     public int timeoutMs = 300000;
+    // See SystemLocationListener.Configuration.distanceMeter.
     public float distanceMeter = 10;
+    // See SystemLocationListener.Configuration.acceptableErrorMeter.
     public float acceptableErrorMeter = 200;
   }
 
@@ -30,7 +35,7 @@ public final class FusedLocationListener extends LocationListener {
     listen(network);
     listen(passive);
 
-    pollGps(config.timeoutMs, config.acceptableErrorMeter);
+    pollGps();
   }
 
   public void stop() {
@@ -48,9 +53,8 @@ public final class FusedLocationListener extends LocationListener {
     });
   }
 
-  private void pollGps(final int timeoutMs, final float acceptableErrorMeter) {
-    if (!isLocationQualified(mostAccurate(), timeoutMs, acceptableErrorMeter) &&
-        !isLocationQualified(latest(), timeoutMs, acceptableErrorMeter)) {
+  private void pollGps() {
+    if (latest() == null) {  // Imply mostAccurate() == null.
       Log.w(TAG, "No qualified location updates received, " +
                  "actively request GPS update. Most Accurate: " +
                  toString(mostAccurate()) +
@@ -59,23 +63,14 @@ public final class FusedLocationListener extends LocationListener {
       gps.requestOnce();
     }
 
-    final FusedLocationListener me = this;
     ThisThread.post(
         new Runnable() {
           @Override
           public void run() {
-            me.pollGps(timeoutMs, acceptableErrorMeter);
+            pollGps();
           }
         },
         timeoutMs);
-  }
-
-  private static boolean isLocationQualified(Location location,
-                                             int timeoutMs,
-                                             float acceptableErrorMeter) {
-    return location != null &&
-           System.currentTimeMillis() - location.getTime() < timeoutMs &&
-           location.getAccuracy() <= acceptableErrorMeter;
   }
 
   private static void copyConfig(SystemLocationListener.Configuration dst,
@@ -84,6 +79,7 @@ public final class FusedLocationListener extends LocationListener {
     dst.intervalMs = src.intervalMs;
     dst.timeoutMs = src.timeoutMs;
     dst.distanceMeter = src.distanceMeter;
+    dst.acceptableErrorMeter = src.acceptableErrorMeter;
   }
 
   private static SystemLocationListener.Configuration gpsConfig(

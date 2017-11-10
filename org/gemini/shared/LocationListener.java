@@ -8,12 +8,15 @@ public class LocationListener {
   private static final String TAG = Debugging.createTag("LocationListener");
   protected final Event.PromisedRaisable<Location> onLocationChanged;
   protected final Context context;
+  // <= 0 to disable timeout.
+  protected final int timeoutMs;
   private Location latest;
   private Location mostAccurate;
 
-  public LocationListener(Context context, final int timeoutMs) {
+  public LocationListener(Context context, int timeoutMs) {
     Preconditions.isNotNull(context);
     this.context = context;
+    this.timeoutMs = timeoutMs;
     onLocationChanged = new Event.PromisedRaisable<>();
     onLocationChanged().add(
         new Event.ParameterRunnable<Location>() {
@@ -21,10 +24,9 @@ public class LocationListener {
           public void run(Location location) {
             if (location == null) return;
             latest = location;
-            if (mostAccurate == null ||
-                mostAccurate.getAccuracy() >= location.getAccuracy() ||
-                (timeoutMs > 0 &&
-                 location.getTime() - mostAccurate.getTime() >= timeoutMs)) {
+            // Clear mostAccurate if it's timed out.
+            if (mostAccurate() == null ||
+                mostAccurate.getAccuracy() >= location.getAccuracy()) {
               mostAccurate = location;
               return;
             }
@@ -39,10 +41,16 @@ public class LocationListener {
   }
 
   public final Location latest() {
+    if (timedOut(latest)) {
+      latest = null;
+    }
     return latest;
   }
 
   public final Location mostAccurate() {
+    if (timedOut(mostAccurate)) {
+      mostAccurate = null;
+    }
     return mostAccurate;
   }
 
@@ -50,5 +58,11 @@ public class LocationListener {
     if (location == null) return "[Location] null";
     // TODO: Better string representation.
     return location.toString();
+  }
+
+  protected boolean timedOut(Location location) {
+    return location == null ||
+           (timeoutMs > 0 &&
+            location.getTime() < System.currentTimeMillis() - timeoutMs);
   }
 }

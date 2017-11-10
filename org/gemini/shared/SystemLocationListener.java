@@ -20,10 +20,15 @@ public final class SystemLocationListener extends LocationListener {
 
   public static final class Configuration {
     public Context context = null;
+    // See requestLocationUpdates.
     public int intervalMs = 30000;
+    // See LocationListener.timeoutMs.
     public int timeoutMs = 300000;
+    // See requestLocationUpdates.
     public float distanceMeter = 10;
     public String provider;
+    // < 0 to disable the limitation of accuracy.
+    public float acceptableErrorMeter = 200;
     public boolean autoStart = true;
 
     public Configuration() {
@@ -126,8 +131,11 @@ public final class SystemLocationListener extends LocationListener {
     public void onLocationChanged(Location location) {
       if (location != null) {
         Log.i(TAG, "Get location changed event: " +
-                   SystemLocationListener.toString(location));
-        owner.onLocationChanged.raise(location);
+                   LocationListener.toString(location));
+        if (owner.config.acceptableErrorMeter < 0 ||
+            location.getAccuracy() <= owner.config.acceptableErrorMeter) {
+          owner.onLocationChanged.raise(location);
+        }
       }
     }
 
