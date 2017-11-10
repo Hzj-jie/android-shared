@@ -14,8 +14,9 @@ public class KeepAliveService extends Service {
   private static final String QUICK_POWER_ON =
       "android.intent.action.QUICKBOOT_POWERON";
   private final int alarmIntervalMs;
+  private int startId;
   private int commandCount = 0;
-  private boolean stopped = false;
+  private int stopAt = commandCount;
 
   public KeepAliveService() {
     this(60000);
@@ -54,6 +55,7 @@ public class KeepAliveService extends Service {
   public final int onStartCommand(Intent intent, int flags, int startId) {
     Log.i(TAG, "Receive command " +
                (intent == null ? "[null intent]" : intent.getAction()));
+    this.startId = startId;
     if (commandCount == 0) {
       if (intent == null) {
         onSystemRestart();
@@ -70,21 +72,30 @@ public class KeepAliveService extends Service {
       keepalive();
       return START_NOT_STICKY;
     }
-    process(intent, commandCount);
+    process(intent);
     commandCount++;
-    if (commandCount == 1) {
+    // First intent after stopSticky().
+    if (stopAt == commandCount - 1) {
       return START_STICKY;
     }
     return START_NOT_STICKY;
   }
   
+  protected final int startId() {
+    return startId;
+  }
+
+  protected final int commandCount() {
+    return commandCount;
+  }
+
   protected final void stopSticky() {
-    stopped = true;
-    stopSelf();
+    stopAt = commandCount + 1;
+    stopSelf(startId);
   }
 
   private final void scheduleRestart(int intervalMs) {
-    if (!stopped) {
+    if (stopAt < commandCount) {
       Intent intent = new Intent(getApplicationContext(), this.getClass());
       intent.setAction(RESTART);
       PendingIntent pendingIntent = PendingIntent.getService(
@@ -107,12 +118,8 @@ public class KeepAliveService extends Service {
     }
   }
 
-  protected void process(Intent intent, int index) {
-    process(intent == null ? null : intent.getAction(), index);
-  }
-
-  protected void process(String action, int index) {
-    process(action);
+  protected void process(Intent intent) {
+    process(intent == null ? null : intent.getAction());
   }
 
   protected void process(String action) {

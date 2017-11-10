@@ -151,7 +151,7 @@ public class Event<ParamT> {
     Preconditions.isNotNull(callback);
     addSelfRemovable(new ParameterCallback<Boolean, ParamT>() {
       @Override
-      public boolean run(ParamT param) {
+      public Boolean run(ParamT param) {
         callback.run(param);
         return false;
       }
