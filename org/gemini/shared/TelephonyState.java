@@ -29,8 +29,8 @@ public final class TelephonyState {
       method = TelephonyManager.class.getDeclaredMethod("getSubId");
       method.setAccessible(true);
       return (Integer)method.invoke(manager());
-    } catch (Exception ex) {
-      Log.e(TAG, "Failed to execute getSubId: " + ex.toString());
+    } catch (Exception e) {
+      Log.e(TAG, "Failed to execute getSubId: " + e.toString());
       // SubscriptionManager.INVALID_SUBSCRIPTION_ID;
       return -1;
     }
@@ -66,9 +66,9 @@ public final class TelephonyState {
           "getPreferredNetworkType", int.class);
       method.setAccessible(true);
       return (Integer)method.invoke(manager(), subId);
-    } catch (Exception ex) {
+    } catch (Exception e) {
       Log.e(TAG,
-          "Failed to execute getPreferredNetworkType (1): " + ex.toString());
+          "Failed to execute getPreferredNetworkType (1): " + e.toString());
       return -1;
     }
   }
@@ -79,9 +79,9 @@ public final class TelephonyState {
           "getPreferredNetworkType");
       method.setAccessible(true);
       return (Integer)method.invoke(manager());
-    } catch (Exception ex) {
+    } catch (Exception e) {
       Log.e(TAG,
-          "Failed to execute getPreferredNetworkType (2): " + ex.toString());
+          "Failed to execute getPreferredNetworkType (2): " + e.toString());
       return -1;
     }
   }
@@ -92,9 +92,9 @@ public final class TelephonyState {
           "setPreferredNetworkType", int.class, int.class);
       method.setAccessible(true);
       return (Boolean)method.invoke(manager(), subId, type);
-    } catch (Exception ex) {
+    } catch (Exception e) {
       Log.e(TAG,
-          "Failed to execute setPreferredNetworkType (1): " + ex.toString());
+          "Failed to execute setPreferredNetworkType (1): " + e.toString());
       return false;
     }
   }
@@ -105,9 +105,9 @@ public final class TelephonyState {
           "setPreferredNetworkType", int.class);
       method.setAccessible(true);
       return (Boolean)method.invoke(manager(), type);
-    } catch (Exception ex) {
+    } catch (Exception e) {
       Log.e(TAG,
-          "Failed to execute setPreferredNetworkType (2): " + ex.toString());
+          "Failed to execute setPreferredNetworkType (2): " + e.toString());
       return false;
     }
   }

@@ -53,9 +53,9 @@ public final class FusedLocationListener extends LocationListener {
         !isLocationQualified(latest(), timeoutMs, acceptableErrorMeter)) {
       Log.w(TAG, "No qualified location updates received, " +
                  "actively request GPS update. Most Accurate: " +
-                 mostAccurate().toString() +
+                 toString(mostAccurate()) +
                  ", Latest: " +
-                 latest().toString());
+                 toString(latest()));
       gps.requestOnce();
     }
 
