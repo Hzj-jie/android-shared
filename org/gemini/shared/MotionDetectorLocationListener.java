@@ -2,9 +2,12 @@ package org.gemini.shared;
 
 import android.content.Context;
 import android.location.Location;
+import android.util.Log;
 import java.util.concurrent.TimeUnit;
 
 public final class MotionDetectorLocationListener extends LocationListener {
+  private static final String TAG =
+      Debugging.createTag("MotionDetectorLocationListener");
   private static final int MOTION_LOCATION_INTERVAL_MS =
       (int) TimeUnit.SECONDS.toMillis(10);
   private final LocationListener listener;
@@ -18,9 +21,12 @@ public final class MotionDetectorLocationListener extends LocationListener {
     wrap(listener);
     pollIntervalMs = pollIntervalMs(config().timeoutMs);
     if (SignificantMotionListener.isSupported(context)) {
+      Log.i(TAG, "SignificantMotionListener is supported.");
       motionDetector = new SignificantMotionListener(context);
       poll();
     } else {
+      Log.w(TAG, "SignificantMotionListener is not supported by the system, " +
+                 "MotionDetectorLocationListener takes no effect.");
       motionDetector = null;
     }
   }

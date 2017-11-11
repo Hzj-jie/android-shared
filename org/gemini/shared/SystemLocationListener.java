@@ -109,7 +109,7 @@ public final class SystemLocationListener extends LocationListener {
 
   public void requestOnce() {
     if (started) return;
-    onLocationChanged().addOnce(
+    onLocationReceived().addOnce(
         new Event.ParameterRunnable<Location>() {
           @Override
           public void run(Location location) {

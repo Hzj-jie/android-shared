@@ -19,8 +19,9 @@ public final class FusedLocationListener extends LocationListener {
     public int intervalMs = 30000;
     // See SystemLocationListener.Configuration.distanceMeter.
     public float distanceMeter = 10;
-    // <=0 to disable GPS.
-    public int gpsPollIntervalMs = 300000;
+    // <=0 to disable GPS. Usually it should be slightly larger than timeoutMs
+    // to avoid being called right before the last Location timed out.
+    public int gpsPollIntervalMs = 300100;
   }
 
   private FusedLocationListener(Configuration config) {
