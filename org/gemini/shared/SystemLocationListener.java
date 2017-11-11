@@ -11,27 +11,29 @@ import java.util.List;
 public final class SystemLocationListener extends LocationListener {
   private static final String TAG =
       Debugging.createTag("SystemLocationListener");
-  private final Configuration config;
+  private final Context context;
+  private final String provider;
+  private final int intervalMs;
+  private final float distanceMeter;
   private final Event.Raisable<Void> onProviderDisabled;
   private final Event.Raisable<Void> onProviderEnabled;
   private final Event.Raisable<Integer> onStatusChanged;
   private final Listener listener;
+  private final Ternary supported;
   private boolean started = false;
 
-  public static final class Configuration {
+  public static final class Configuration
+      extends LocationListener.Configuration {
     public Context context = null;
+    public String provider;
     // See requestLocationUpdates.
     public int intervalMs = 30000;
-    // See LocationListener.timeoutMs.
-    public int timeoutMs = 300000;
     // See requestLocationUpdates.
     public float distanceMeter = 10;
-    public String provider;
-    // < 0 to disable the limitation of accuracy.
-    public float acceptableErrorMeter = 200;
     public boolean autoStart = true;
 
     public Configuration() {
+      super();
       network();
     }
 
@@ -49,38 +51,53 @@ public final class SystemLocationListener extends LocationListener {
   }
 
   public SystemLocationListener(Configuration config) {
-    super(config.context, config.timeoutMs);
-    this.config = config;
+    super(config);
+    Preconditions.isNotNull(config);
+    context = config.context;
+    provider = config.provider;
+    intervalMs = config.intervalMs;
+    distanceMeter = config.distanceMeter;
     onProviderDisabled = new Event.Raisable<>();
     onProviderEnabled = new Event.Raisable<>();
     onStatusChanged = new Event.Raisable<>();
     listener = new Listener(this);
+    supported = new Ternary();
     if (config.autoStart) {
       start();
     }
 
     Location last = null;
     try {
-      last = manager().getLastKnownLocation(config.provider);
+      last = manager().getLastKnownLocation(provider);
     } catch (Exception e) {
       Log.e(TAG, "Failed to get last known location from provider " +
-                 config.provider + ": " + e.toString());
+                 provider + ": " + e.toString());
     }
     if (last != null) {
       Log.i(TAG, "Get latest location: " + toString(last));
-      onLocationChanged.raise(last);
+      newLocationReceived(last);
     }
+  }
+
+  public boolean isSupported() {
+    return supported.isUnknown() || supported.isTrue();
+  }
+
+  public boolean isNotSupported() {
+    return supported.isFalse();
   }
 
   public void start() {
     if (started) return;
     try {
       manager().requestLocationUpdates(
-          config.provider, config.intervalMs, config.distanceMeter, listener);
+          provider, intervalMs, distanceMeter, listener);
+      supported.set(true);
       started = true;
     } catch (Exception e) {
       Log.e(TAG, "Failed to request location updates from provider " +
-                 config.provider + ": " + e.toString());
+                 provider + ": " + e.toString());
+      supported.set(false);
     }
   }
 
@@ -129,14 +146,7 @@ public final class SystemLocationListener extends LocationListener {
 
     @Override
     public void onLocationChanged(Location location) {
-      if (location != null) {
-        Log.i(TAG, "Get location changed event: " +
-                   LocationListener.toString(location));
-        if (owner.config.acceptableErrorMeter < 0 ||
-            location.getAccuracy() <= owner.config.acceptableErrorMeter) {
-          owner.onLocationChanged.raise(location);
-        }
-      }
+      owner.newLocationReceived(location);
     }
 
     @Override

@@ -6,32 +6,30 @@ import android.util.Log;
 
 public class LocationListener {
   private static final String TAG = Debugging.createTag("LocationListener");
-  protected final Event.PromisedRaisable<Location> onLocationChanged;
-  protected final Context context;
-  // <= 0 to disable timeout.
-  protected final int timeoutMs;
+  private final int timeoutMs;
+  private final float acceptableErrorMeter;
+  private final Event.PromisedRaisable<Location> onLocationChanged;
   private Location latest;
   private Location mostAccurate;
 
-  public LocationListener(Context context, int timeoutMs) {
-    Preconditions.isNotNull(context);
-    this.context = context;
-    this.timeoutMs = timeoutMs;
+  public static class Configuration {
+    // <= 0 to disable timeout.
+    public int timeoutMs = 300000;
+    // < 0 to disable the limitation of accuracy.
+    public float acceptableErrorMeter = 200;
+
+    public void copyFrom(Configuration other) {
+      Preconditions.isNotNull(other);
+      timeoutMs = other.timeoutMs;
+      acceptableErrorMeter = other.acceptableErrorMeter;
+    }
+  }
+
+  public LocationListener(Configuration config) {
+    Preconditions.isNotNull(config);
+    timeoutMs = config.timeoutMs;
+    acceptableErrorMeter = config.acceptableErrorMeter;
     onLocationChanged = new Event.PromisedRaisable<>();
-    onLocationChanged().add(
-        new Event.ParameterRunnable<Location>() {
-          @Override
-          public void run(Location location) {
-            if (location == null) return;
-            latest = location;
-            // Clear mostAccurate if it's timed out.
-            if (mostAccurate() == null ||
-                mostAccurate.getAccuracy() >= location.getAccuracy()) {
-              mostAccurate = location;
-              return;
-            }
-          }
-        });
   }
 
   public void stop() {}
@@ -54,13 +52,40 @@ public class LocationListener {
     return mostAccurate;
   }
 
+  protected final void clearMostAccurate() {
+    mostAccurate = null;
+  }
+
+  protected final void clear() {
+    mostAccurate = null;
+    latest = null;
+  }
+
+  protected final void newLocationReceived(Location location) {
+	Log.i(TAG, "Get location changed event: " + toString(location));
+    if (location == null) return;
+    if (acceptableErrorMeter >= 0 &&
+        location.getAccuracy() > acceptableErrorMeter) return;
+    if (timedOut(location)) return;
+
+    // Clear latest if it's timed out.
+    if (latest() == null || latest.getTime() < location.getTime()) {
+      latest = location;
+    }
+    // Clear mostAccurate if it's timed out.
+    if (mostAccurate() == null ||
+        mostAccurate.getAccuracy() >= location.getAccuracy()) {
+      mostAccurate = location;
+    }
+  }
+
   protected static String toString(Location location) {
     if (location == null) return "[Location] null";
     // TODO: Better string representation.
     return location.toString();
   }
 
-  protected boolean timedOut(Location location) {
+  private final boolean timedOut(Location location) {
     return location == null ||
            (timeoutMs > 0 &&
             location.getTime() < System.currentTimeMillis() - timeoutMs);

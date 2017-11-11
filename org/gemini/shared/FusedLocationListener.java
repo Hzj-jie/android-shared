@@ -7,25 +7,27 @@ import android.util.Log;
 public final class FusedLocationListener extends LocationListener {
   private static final String TAG =
       Debugging.createTag("FusedLocationListener");
+  private final int gpsPollIntervalMs;
   private final SystemLocationListener gps;
   private final SystemLocationListener network;
   private final SystemLocationListener passive;
 
-  public static final class Configuration {
+  public static final class Configuration
+      extends LocationListener.Configuration {
     public Context context = null;
     // See SystemLocationListener.Configuration.intervalMs.
     public int intervalMs = 30000;
-    // See LocationListener.timeoutMs and
-    // SystemLocationListener.Configuration.timeoutMs.
-    public int timeoutMs = 300000;
     // See SystemLocationListener.Configuration.distanceMeter.
     public float distanceMeter = 10;
-    // See SystemLocationListener.Configuration.acceptableErrorMeter.
-    public float acceptableErrorMeter = 200;
+    // <=0 to disable GPS.
+    public int gpsPollIntervalMs = 300000;
   }
 
   public FusedLocationListener(Configuration config) {
-    super(config.context, config.timeoutMs);
+    super(config);
+    Preconditions.isNotNull(config);
+
+    gpsPollIntervalMs = config.gpsPollIntervalMs;
 
     gps = new SystemLocationListener(gpsConfig(config));
     network = new SystemLocationListener(networkConfig(config));
@@ -35,7 +37,9 @@ public final class FusedLocationListener extends LocationListener {
     listen(network);
     listen(passive);
 
-    pollGps();
+    if (gpsPollIntervalMs > 0) {
+      pollGps();
+    }
   }
 
   public void stop() {
@@ -48,7 +52,7 @@ public final class FusedLocationListener extends LocationListener {
     listener.onLocationChanged().add(new Event.ParameterRunnable<Location>() {
       @Override
       public void run(Location location) {
-        onLocationChanged.raise(location);
+        newLocationReceived(location);
       }
     });
   }
@@ -70,16 +74,15 @@ public final class FusedLocationListener extends LocationListener {
             pollGps();
           }
         },
-        timeoutMs);
+        gpsPollIntervalMs);
   }
 
   private static void copyConfig(SystemLocationListener.Configuration dst,
                                  Configuration src) {
+    dst.copyFrom(src);
     dst.context = src.context;
     dst.intervalMs = src.intervalMs;
-    dst.timeoutMs = src.timeoutMs;
     dst.distanceMeter = src.distanceMeter;
-    dst.acceptableErrorMeter = src.acceptableErrorMeter;
   }
 
   private static SystemLocationListener.Configuration gpsConfig(
