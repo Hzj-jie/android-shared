@@ -37,4 +37,26 @@ public final class Debugging {
   public static String currentTime() {
     return DateFormat.getDateTimeInstance().format(new Date());
   }
+
+  private static final class UncaughtExceptionHandlerSetter {
+    private UncaughtExceptionHandlerSetter() {}
+    public static void set() {}
+
+    static {
+      Thread.setDefaultUncaughtExceptionHandler(
+          new Thread.UncaughtExceptionHandler() {
+            @Override
+            public void uncaughtException(Thread t, Throwable e) {
+              Log.e(TAG,
+                    "Unhandled exception @ thread " + t.getId() +
+                    ": " + e.toString(),
+                    e);
+            }
+          });
+    }
+  }
+
+  public static void catchUnhandledExceptions() {
+    UncaughtExceptionHandlerSetter.set();
+  }
 }

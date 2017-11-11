@@ -23,7 +23,7 @@ public final class FusedLocationListener extends LocationListener {
     public int gpsPollIntervalMs = 300000;
   }
 
-  public FusedLocationListener(Configuration config) {
+  private FusedLocationListener(Configuration config) {
     super(config);
     Preconditions.isNotNull(config);
 
@@ -33,28 +33,24 @@ public final class FusedLocationListener extends LocationListener {
     network = new SystemLocationListener(networkConfig(config));
     passive = new SystemLocationListener(passiveConfig(config));
 
-    listen(gps);
-    listen(network);
-    listen(passive);
+    wrap(gps);
+    wrap(network);
+    wrap(passive);
 
     if (gpsPollIntervalMs > 0) {
       pollGps();
     }
   }
 
+  public static LocationListener create(Configuration config) {
+    return new MotionDetectorLocationListener(
+        config.context, new FusedLocationListener(config));
+  }
+
   public void stop() {
     gps.stop();
     network.stop();
     passive.stop();
-  }
-
-  private void listen(SystemLocationListener listener) {
-    listener.onLocationChanged().add(new Event.ParameterRunnable<Location>() {
-      @Override
-      public void run(Location location) {
-        newLocationReceived(location);
-      }
-    });
   }
 
   private void pollGps() {

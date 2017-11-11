@@ -1,5 +1,6 @@
 package org.gemini.shared;
 
+import android.os.Build;
 import android.util.Log;
 
 public final class Preconditions {
@@ -32,5 +33,9 @@ public final class Preconditions {
 
   public static boolean isNotNull(Object v) {
     return isTrue(v != null);
+  }
+
+  public static boolean isOsAtLeast(int version) {
+    return isTrue(Build.VERSION.SDK_INT >= version);
   }
 }

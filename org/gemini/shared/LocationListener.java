@@ -41,15 +41,24 @@ public class LocationListener {
   public final Location latest() {
     if (timedOut(latest)) {
       latest = null;
+      return null;
     }
-    return latest;
+    return new Location(latest);
   }
 
   public final Location mostAccurate() {
     if (timedOut(mostAccurate)) {
       mostAccurate = null;
+      return null;
     }
-    return mostAccurate;
+    return new Location(mostAccurate);
+  }
+
+  public final Configuration config() {
+    Configuration r = new Configuration();
+    r.timeoutMs = timeoutMs;
+    r.acceptableErrorMeter = acceptableErrorMeter;
+    return r;
   }
 
   protected final void clearMostAccurate() {
@@ -79,10 +88,33 @@ public class LocationListener {
     }
   }
 
+  protected final void keepLatest() {
+    updateToNow(latest);
+  }
+
+  protected final void keepMostAccurate() {
+    updateToNow(mostAccurate);
+  }
+
+  protected final void wrap(LocationListener listener) {
+    Preconditions.isNotNull(listener);
+    listener.onLocationChanged().add(new Event.ParameterRunnable<Location>() {
+      @Override
+      public void run(Location location) {
+        newLocationReceived(location);
+      }
+    });
+  }
+
   protected static String toString(Location location) {
     if (location == null) return "[Location] null";
     // TODO: Better string representation.
     return location.toString();
+  }
+
+  protected static void updateToNow(Location location) {
+    Preconditions.isNotNull(location);
+    location.setTime(System.currentTimeMillis());
   }
 
   private final boolean timedOut(Location location) {
