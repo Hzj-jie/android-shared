@@ -98,7 +98,8 @@ public class KeepAliveService extends Service {
 
   private final void scheduleRestart(int intervalMs) {
     if (stopAt < commandCount) {
-      Intent intent = new Intent(RESTART, Uri.EMPTY, this, getClass());
+      Intent intent = new Intent(
+          RESTART, Uri.EMPTY, this, getClass());
       intent.setPackage(getPackageName());
       PendingIntent pendingIntent = PendingIntent.getService(
           this, 0, intent, PendingIntent.FLAG_ONE_SHOT);

@@ -57,7 +57,7 @@ public final class MotionDetectorLocationListener extends LocationListener {
 
   private boolean isQualified(Location location) {
     return location != null &&
-           motionDetector.motionDetectedMs() <
+           motionDetector.detectedMs() <
            location.getTime() - MOTION_LOCATION_INTERVAL_MS;
   }
 

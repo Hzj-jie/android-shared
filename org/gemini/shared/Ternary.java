@@ -10,6 +10,10 @@ public final class Ternary {
     this(UNKNOWN);
   }
 
+  public Ternary(boolean v) {
+    set(v);
+  }
+
   private Ternary(int value) {
     this.value = value;
   }

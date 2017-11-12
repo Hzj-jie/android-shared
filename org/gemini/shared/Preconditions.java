@@ -35,7 +35,19 @@ public final class Preconditions {
     return isTrue(v != null);
   }
 
+  public static boolean isOsAtLeast(int version, String msg) {
+    return isTrue(Build.VERSION.SDK_INT >= version, msg);
+  }
+
   public static boolean isOsAtLeast(int version) {
     return isTrue(Build.VERSION.SDK_INT >= version);
+  }
+
+  public static boolean notReached(String msg) {
+    return isTrue(false, msg);
+  }
+
+  public static boolean notReached() {
+    return isTrue(false);
   }
 }
