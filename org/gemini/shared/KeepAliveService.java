@@ -5,8 +5,10 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.IBinder;
 import android.util.Log;
+import java.util.concurrent.TimeUnit;
 
 public class KeepAliveService extends Service {
   public static final String RESTART = "org.gemini.shared.intent.RESTART";
@@ -96,10 +98,10 @@ public class KeepAliveService extends Service {
 
   private final void scheduleRestart(int intervalMs) {
     if (stopAt < commandCount) {
-      Intent intent = new Intent(getApplicationContext(), this.getClass());
-      intent.setAction(RESTART);
+      Intent intent = new Intent(RESTART, Uri.EMPTY, this, getClass());
+      intent.setPackage(getPackageName());
       PendingIntent pendingIntent = PendingIntent.getService(
-          this, 1, intent, PendingIntent.FLAG_ONE_SHOT);
+          this, 0, intent, PendingIntent.FLAG_ONE_SHOT);
       AlarmManager alarmManager =
           (AlarmManager) getSystemService(Context.ALARM_SERVICE);
       alarmManager.set(AlarmManager.RTC,
