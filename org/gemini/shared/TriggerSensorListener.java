@@ -26,7 +26,7 @@ public class TriggerSensorListener extends SensorListener {
     return onDetected;
   }
 
-  public long detectedMs() {
+  public final long detectedMs() {
     return detectedMs;
   }
 

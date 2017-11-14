@@ -50,4 +50,12 @@ public final class Preconditions {
   public static boolean notReached() {
     return isTrue(false);
   }
+
+  public static int notReachedI(String msg) {
+    return isTrue(false, msg) ? 0 : 0;
+  }
+
+  public static int notReachedI() {
+    return isTrue(false) ? 0 : 0;
+  }
 }

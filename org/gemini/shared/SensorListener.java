@@ -38,11 +38,11 @@ public class SensorListener {
   }
 
   protected int sensorType() {
-    return Preconditions.notReached() ? 0 : 0;
+    return Preconditions.notReachedI();
   }
 
   protected WakeupChoice wakeup() {
-    return WakeupChoice.PREFER;
+    return WakeupChoice.DISLIKE;
   }
 
   protected static boolean isSupported(Context context,
