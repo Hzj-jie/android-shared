@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit;
 
 public class LocationListener {
   private static final String TAG = Debugging.createTag("LocationListener");
+  protected final String listenerType;
   private final int timeoutMs;
   private final float acceptableErrorMeter;
   private final Event.PromisedRaisable<Location> onLocationChanged;
@@ -28,6 +29,7 @@ public class LocationListener {
   }
 
   public LocationListener(Configuration config) {
+    listenerType = getClass().getName();
     Preconditions.isNotNull(config);
     timeoutMs = config.timeoutMs;
     acceptableErrorMeter = config.acceptableErrorMeter;
@@ -103,10 +105,12 @@ public class LocationListener {
   }
 
   protected final void keepLatest() {
+    Log.i(TAG, listenerType + " kept the latest location.");
     updateToNow(latest);
   }
 
   protected final void keepMostAccurate() {
+    Log.i(TAG, listenerType + " kept the most accurate location.");
     updateToNow(mostAccurate);
   }
 
