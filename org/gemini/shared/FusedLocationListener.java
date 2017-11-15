@@ -97,8 +97,6 @@ public final class FusedLocationListener extends LocationListener {
     SystemLocationListener.Configuration result =
         new SystemLocationListener.Configuration();
     copyConfig(result, config);
-    result.network();
-    result.autoStart = true;
     return result;
   }
 
@@ -108,7 +106,6 @@ public final class FusedLocationListener extends LocationListener {
         new SystemLocationListener.Configuration();
     copyConfig(result, config);
     result.passive();
-    result.autoStart = true;
     return result;
   }
 }
