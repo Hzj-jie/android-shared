@@ -83,6 +83,8 @@ public class SensorEventListener extends SensorListener {
         Log.i(TAG, "Event sensor " + sensorListenerType + " detected at " +
                    System.currentTimeMillis() + ": " +
                    SensorEventListener.toString(event));
+        if (event == null) return;
+        if (event.sensor.getType() != sensorType()) return;
         onDetected.raise(event);
       }
     };

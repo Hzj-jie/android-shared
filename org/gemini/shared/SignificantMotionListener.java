@@ -1,29 +1,80 @@
 package org.gemini.shared;
 
 import android.content.Context;
-import android.hardware.Sensor;
-import android.os.Build;
 
-public final class SignificantMotionListener extends TriggerSensorListener {
+public final class SignificantMotionListener {
   private static final String TAG =
       Debugging.createTag("SignificantMotionListener");
-  private static final int TYPE = Sensor.TYPE_SIGNIFICANT_MOTION;
-  private static final WakeupChoice WAKEUP = WakeupChoice.DEFAULT;
-
-  public SignificantMotionListener(Context context) {
-    super(context);
-  }
+  private final Event.Raisable<Void> onDetected;
+  private final SystemSignificantMotionListener systemListener;
+  private final SimulatedSignificantMotionListener simulatedListener;
+  private long detectedMs = System.currentTimeMillis();
 
   public static boolean isSupported(Context context) {
-    return Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2 &&
-           isSupported(context, TYPE, WAKEUP);
+    return SystemSignificantMotionListener.isSupported(context) ||
+           SimulatedSignificantMotionListener.isSupported(context);
   }
 
-  protected int sensorType() {
-    return TYPE;
+  public SignificantMotionListener(Context context) {
+    this(config(context));
   }
 
-  protected WakeupChoice wakeup() {
-    return WAKEUP;
+  public SignificantMotionListener(
+      SimulatedSignificantMotionListener.Configuration config) {
+    Preconditions.isNotNull(config);
+    onDetected = new Event.Raisable<>();
+    if (SystemSignificantMotionListener.isSupported(config.context)) {
+      systemListener = new SystemSignificantMotionListener(config.context);
+      systemListener.onDetected().add(new Event.ParameterRunnable<Void>() {
+        @Override
+        public void run(Void nothing) {
+          onTrigger(systemListener.detectedMs());
+        }
+      });
+      simulatedListener = null;
+    } else if (SimulatedSignificantMotionListener.isSupported(config.context)) {
+      systemListener = null;
+      simulatedListener = new SimulatedSignificantMotionListener(config);
+      simulatedListener.onDetected().add(new Event.ParameterRunnable<Void>() {
+        @Override
+        public void run(Void nothing) {
+          onTrigger();
+        }
+      });
+    } else {
+      systemListener = null;
+      simulatedListener = null;
+      Preconditions.notReached();
+    }
+  }
+
+  public void stop() {
+    if (systemListener != null) systemListener.stop();
+    if (simulatedListener != null) simulatedListener.stop();
+  }
+
+  public Event<Void> onDetected() {
+    return onDetected;
+  }
+
+  public long detectedMs() {
+    return detectedMs;
+  }
+
+  private void onTrigger(long timeMs) {
+    detectedMs = timeMs;
+    onDetected.raise(null);
+  }
+
+  private void onTrigger() {
+    onTrigger(System.currentTimeMillis());
+  }
+
+  private static SimulatedSignificantMotionListener.Configuration config(
+      Context context) {
+    SimulatedSignificantMotionListener.Configuration result =
+        new SimulatedSignificantMotionListener.Configuration();
+    result.context = context;
+    return result;
   }
 }

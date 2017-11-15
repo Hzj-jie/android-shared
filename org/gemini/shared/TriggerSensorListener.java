@@ -14,6 +14,7 @@ public class TriggerSensorListener extends SensorListener {
   private final Event.Raisable<Void> onDetected;
   private final TriggerEventListener listener;
   private long detectedMs = System.currentTimeMillis();
+  private boolean started = false;
 
   public TriggerSensorListener(Context context) {
     super(context);
@@ -31,15 +32,21 @@ public class TriggerSensorListener extends SensorListener {
   }
 
   public final void start() {
+    if (started) return;
     if (!manager().requestTriggerSensor(listener, sensor)) {
       Log.e(TAG, "Failed to start trigger sensor " + sensorListenerType);
+      return;
     }
+    started = true;
   }
 
   public final void stop() {
+    if (!started) return;
     if (!manager().cancelTriggerSensor(listener, sensor)) {
       Log.e(TAG, "Failed to stop trigger sensor " + sensorListenerType);
+      return;
     }
+    started = false;
   }
 
   protected static String toString(TriggerEvent event) {
@@ -49,6 +56,7 @@ public class TriggerSensorListener extends SensorListener {
   }
 
   private TriggerEventListener newListener() {
+    final TriggerSensorListener me = this;
     return new TriggerEventListener() {
       @Override
       public void onTrigger(TriggerEvent event) {
@@ -58,6 +66,8 @@ public class TriggerSensorListener extends SensorListener {
                    TriggerSensorListener.toString(event));
         detectedMs = System.currentTimeMillis();
         onDetected.raise(null);
+
+        started = false;
         start();
       }
     };
