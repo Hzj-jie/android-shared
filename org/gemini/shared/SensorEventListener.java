@@ -3,7 +3,6 @@ package org.gemini.shared;
 import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
-import android.hardware.SensorManager;
 import android.os.Build;
 import android.util.Log;
 import java.util.concurrent.TimeUnit;
@@ -20,7 +19,7 @@ public class SensorEventListener extends SensorListener {
   public static class Configuration {
     public Context context = null;
     // See registerListener().
-    public int intervalMs = SensorManager.SENSOR_DELAY_NORMAL;
+    public int intervalMs = 20;
     // See registerListener().
     public int maxReportLatencyMs = 60000;
   }
@@ -65,8 +64,17 @@ public class SensorEventListener extends SensorListener {
 
   protected static String toString(SensorEvent event) {
     if (event == null) return "[SensorEvent] null";
-    // TODO: Better string representation.
-    return event.toString();
+    StringBuilder result = new StringBuilder();
+    result.append("[SensorEvent] ")
+          .append("timestamp: ")
+          .append(event.timestamp)
+          .append("values: ");
+    for (float value : event.values) {
+      result.append("{ ")
+            .append(value)
+            .append("} ");
+    }
+    return result.toString();
   }
 
   private android.hardware.SensorEventListener newListener() {

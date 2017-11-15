@@ -25,6 +25,10 @@ public final class SimulatedSignificantMotionListener {
   public static class Configuration
       extends AccelerometerListener.Configuration {
     public int triggerDistanceMeter = 1000;
+
+    public Configuration() {
+      intervalMs = 10000;
+    }
   }
 
   public SimulatedSignificantMotionListener(Configuration config) {
