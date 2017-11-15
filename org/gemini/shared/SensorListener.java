@@ -12,7 +12,7 @@ public class SensorListener {
   protected final Sensor sensor;
 
   public SensorListener(Context context) {
-    sensorListenerType = getClass().getName();
+    sensorListenerType = getClass().getSimpleName();
     Preconditions.isNotNull(context);
     this.context = context;
     sensor = newSensor();
