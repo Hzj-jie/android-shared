@@ -33,7 +33,6 @@ public final class SystemLocationListener extends LocationListener {
     public boolean autoStart = true;
 
     public Configuration() {
-      super();
       network();
     }
 

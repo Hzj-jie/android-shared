@@ -43,9 +43,11 @@ public final class MotionDetectorLocationListener extends LocationListener {
       @Override
       public void run() {
         if (isQualified(mostAccurate())) {
+          listener.keepMostAccurate();
           keepMostAccurate();
         }
         if (isQualified(latest())) {
+          listener.keepLatest();
           keepLatest();
         }
 

@@ -2,20 +2,26 @@ package org.gemini.shared;
 
 import android.content.Context;
 import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorManager;
 
-public final class AccelerometerListener {
+public final class AccelerometerListener extends SensorEventListener {
   private static final String TAG =
       Debugging.createTag("AccelerometerListener");
   private static final int TYPE = Sensor.TYPE_ACCELEROMETER;
-  private final Event.Raisable<SensorEvent> onDetected;
+  private static final WakeupChoice WAKEUP = WakeupChoice.DISLIKE;
 
   public static boolean isSupported(Context context) {
-    return false;
+    return isSupported(context, TYPE, WAKEUP);
   }
 
-  public AccelerometerListener(Context context) {
-    onDetected = new Event.Raisable<>();
+  public AccelerometerListener(Configuration config) {
+    super(config);
+  }
+
+  protected int sensorType() {
+    return TYPE;
+  }
+
+  protected WakeupChoice wakeup() {
+    return WAKEUP;
   }
 }

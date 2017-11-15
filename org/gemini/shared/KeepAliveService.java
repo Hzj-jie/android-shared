@@ -13,8 +13,6 @@ import java.util.concurrent.TimeUnit;
 public class KeepAliveService extends Service {
   public static final String RESTART = "org.gemini.shared.intent.RESTART";
   private static final String TAG = Debugging.createTag("KeepAliveService");
-  private static final String QUICK_POWER_ON =
-      "android.intent.action.QUICKBOOT_POWERON";
   private final int alarmIntervalMs;
   private int startId;
   private int commandCount = 0;
@@ -65,8 +63,7 @@ public class KeepAliveService extends Service {
       } else if (RESTART.equals(intent.getAction())) {
         onKeepAliveRestart();
         onRestart();
-      } else if (Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction()) ||
-                 QUICK_POWER_ON.equals(intent.getAction())) {
+      } else if (BootCompletedListener.isBootCompleted(intent.getAction())) {
         onBootCompleted();
       }
     } else if (RESTART.equals(intent.getAction())) {
