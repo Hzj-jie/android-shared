@@ -27,7 +27,8 @@ public final class SimulatedSignificantMotionListener {
     public int triggerDistanceMeter = 1000;
 
     public Configuration() {
-      intervalMs = 10000;
+      // This line crashes the OS of Android M running on Huawei Honor 6P.
+      // intervalMs = 10000;
     }
   }
 
@@ -50,11 +51,14 @@ public final class SimulatedSignificantMotionListener {
               Math.pow(event.values[1], 2) +
               Math.pow(event.values[2], 2) -
               Math.pow(SensorManager.GRAVITY_EARTH, 2));
+          if (Float.isNaN(acceleration)) {
+            acceleration = 0;
+          }
           speedMeterPerSecond += acceleration *
               TimeUnit.MILLISECONDS.toSeconds(eventTimeMs - lastEventTimeMs);
-          Log.i(TAG, "Acceleration: " + acceleration + ", " +
-                     "Speed: " + speedMeterPerSecond + ", " +
-                     "Distance: " + distance);
+          Log.i(TAG, "Acceleration: " + acceleration +
+                     ", Speed: " + speedMeterPerSecond +
+                     ", Distance: " + distance);
           if (distance >= triggerDistanceMeter) {
             Log.i(TAG, "Distance over " + triggerDistanceMeter +
                        ", will trigger event.");

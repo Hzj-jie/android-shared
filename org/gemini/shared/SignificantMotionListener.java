@@ -1,6 +1,7 @@
 package org.gemini.shared;
 
 import android.content.Context;
+import android.util.Log;
 
 public final class SignificantMotionListener {
   private static final String TAG =
@@ -24,6 +25,7 @@ public final class SignificantMotionListener {
     Preconditions.isNotNull(config);
     onDetected = new Event.Raisable<>();
     if (SystemSignificantMotionListener.isSupported(config.context)) {
+      Log.i(TAG, "Use SystemSignificantMotionListener");
       systemListener = new SystemSignificantMotionListener(config.context);
       systemListener.onDetected().add(new Event.ParameterRunnable<Void>() {
         @Override
@@ -33,6 +35,7 @@ public final class SignificantMotionListener {
       });
       simulatedListener = null;
     } else if (SimulatedSignificantMotionListener.isSupported(config.context)) {
+      Log.i(TAG, "Use SimulatedSignificantMotionListener");
       systemListener = null;
       simulatedListener = new SimulatedSignificantMotionListener(config);
       simulatedListener.onDetected().add(new Event.ParameterRunnable<Void>() {

@@ -3,6 +3,7 @@ package org.gemini.shared;
 import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
+import android.hardware.SensorManager;
 import android.os.Build;
 import android.util.Log;
 import java.util.concurrent.TimeUnit;
@@ -19,7 +20,7 @@ public class SensorEventListener extends SensorListener {
   public static class Configuration {
     public Context context = null;
     // See registerListener().
-    public int intervalMs = 20;
+    public int intervalMs = SensorManager.SENSOR_DELAY_NORMAL;
     // See registerListener().
     public int maxReportLatencyMs = 60000;
   }
@@ -27,7 +28,16 @@ public class SensorEventListener extends SensorListener {
   public SensorEventListener(Configuration config) {
     super(config.context);
     Preconditions.isNotNull(config);
-    intervalUs = (int) TimeUnit.MILLISECONDS.toMicros(config.intervalMs);
+    if (config.intervalMs == SensorManager.SENSOR_DELAY_NORMAL ||
+        config.intervalMs == SensorManager.SENSOR_DELAY_UI ||
+        config.intervalMs == SensorManager.SENSOR_DELAY_GAME ||
+        config.intervalMs == SensorManager.SENSOR_DELAY_FASTEST) {
+      intervalUs = config.intervalMs;
+    } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
+      intervalUs = (int) TimeUnit.MILLISECONDS.toMicros(config.intervalMs);
+    } else {
+      intervalUs = SensorManager.SENSOR_DELAY_NORMAL;
+    }
     maxReportLatencyUs =
         (int) TimeUnit.MILLISECONDS.toMicros(config.maxReportLatencyMs);
     onDetected = new Event.Raisable<>();
@@ -68,7 +78,7 @@ public class SensorEventListener extends SensorListener {
     result.append("[SensorEvent] ")
           .append("timestamp: ")
           .append(event.timestamp)
-          .append("values: ");
+          .append(" values: ");
     for (float value : event.values) {
       result.append("{ ")
             .append(value)
@@ -79,6 +89,10 @@ public class SensorEventListener extends SensorListener {
 
   private android.hardware.SensorEventListener newListener() {
     return new android.hardware.SensorEventListener() {
+      private final int intervalMs =
+          (int) TimeUnit.MICROSECONDS.toMillis(intervalUs);
+      private long lastMs = 0;
+
       @Override
       public void onAccuracyChanged(Sensor sensor, int accuracy) {
         Log.i(TAG, "Event sensor " + sensorListenerType + " changed accuracy " +
@@ -93,6 +107,8 @@ public class SensorEventListener extends SensorListener {
                    SensorEventListener.toString(event));
         if (event == null) return;
         if (event.sensor.getType() != sensorType()) return;
+        if (System.currentTimeMillis() - lastMs < intervalMs) return;
+        lastMs = System.currentTimeMillis();
         onDetected.raise(event);
       }
     };
