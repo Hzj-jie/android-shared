@@ -12,6 +12,7 @@ public final class SimulatedSignificantMotionListener {
   private static final String TAG =
       Debugging.createTag("SimulatedSignificantMotionListener");
   private final Event.Raisable<Void> onDetected;
+  private final int triggerSpeedMeterPerSecond;
   private final int triggerDistanceMeter;
   private final AccelerometerListener listener;
   private long lastEventTimeMs = 0;
@@ -24,7 +25,8 @@ public final class SimulatedSignificantMotionListener {
 
   public static class Configuration
       extends AccelerometerListener.Configuration {
-    public int triggerDistanceMeter = 1000;
+    public int triggerSpeedMeterPerSecond = 20;
+    public int triggerDistanceMeter = 10000;
 
     public Configuration() {
       intervalMs = 1000;
@@ -34,6 +36,7 @@ public final class SimulatedSignificantMotionListener {
   public SimulatedSignificantMotionListener(Configuration config) {
     Preconditions.isNotNull(config);
     onDetected = new Event.Raisable<>();
+    triggerSpeedMeterPerSecond = config.triggerSpeedMeterPerSecond;
     triggerDistanceMeter = config.triggerDistanceMeter;
     listener = new AccelerometerListener(config);
     listener.onDetected().add(new Event.ParameterRunnable<SensorEvent>() {
@@ -58,11 +61,20 @@ public final class SimulatedSignificantMotionListener {
           Log.i(TAG, "Acceleration: " + acceleration +
                      ", Speed: " + speedMeterPerSecond +
                      ", Distance: " + distance);
+          boolean trigger = false;
           if (distance >= triggerDistanceMeter) {
             Log.i(TAG, "Distance over " + triggerDistanceMeter +
                        ", will trigger event.");
+            trigger = true;
+          }
+          if (speedMeterPerSecond >= triggerSpeedMeterPerSecond) {
+            Log.i(TAG, "Speed over " + triggerSpeedMeterPerSecond +
+                       ", will trigger event.");
+            trigger = true;
+          }
+          if (trigger) {
             onDetected.raise(null);
-            distance %= triggerDistanceMeter;
+            distance = 0;
             speedMeterPerSecond = 0;
           }
         }
