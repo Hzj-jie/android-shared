@@ -27,8 +27,7 @@ public final class SimulatedSignificantMotionListener {
     public int triggerDistanceMeter = 1000;
 
     public Configuration() {
-      // This line crashes the OS of Android M running on Huawei Honor 6P.
-      // intervalMs = 10000;
+      intervalMs = 1000;
     }
   }
 

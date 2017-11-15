@@ -28,10 +28,7 @@ public class SensorEventListener extends SensorListener {
   public SensorEventListener(Configuration config) {
     super(config.context);
     Preconditions.isNotNull(config);
-    if (config.intervalMs == SensorManager.SENSOR_DELAY_NORMAL ||
-        config.intervalMs == SensorManager.SENSOR_DELAY_UI ||
-        config.intervalMs == SensorManager.SENSOR_DELAY_GAME ||
-        config.intervalMs == SensorManager.SENSOR_DELAY_FASTEST) {
+    if (isPredefinedDelay(config.intervalMs)) {
       intervalUs = config.intervalMs;
     } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
       intervalUs = (int) TimeUnit.MILLISECONDS.toMicros(config.intervalMs);
@@ -70,6 +67,13 @@ public class SensorEventListener extends SensorListener {
 
   public final void stop() {
     manager().unregisterListener(listener, sensor);
+  }
+
+  protected static boolean isPredefinedDelay(int value) {
+    return value == SensorManager.SENSOR_DELAY_NORMAL ||
+           value == SensorManager.SENSOR_DELAY_UI ||
+           value == SensorManager.SENSOR_DELAY_GAME ||
+           value == SensorManager.SENSOR_DELAY_FASTEST;
   }
 
   protected static String toString(SensorEvent event) {
