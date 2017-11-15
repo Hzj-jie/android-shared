@@ -4,6 +4,7 @@ import android.content.Context;
 import android.location.Location;
 import android.util.Log;
 import java.util.concurrent.TimeUnit;
+import java.util.ArrayList;
 
 public class LocationListener {
   private static final String TAG = Debugging.createTag("LocationListener");
@@ -11,6 +12,7 @@ public class LocationListener {
   private final float acceptableErrorMeter;
   private final Event.PromisedRaisable<Location> onLocationChanged;
   private final Event.Raisable<Location> onLocationReceived;
+  private final ArrayList<LocationListener> wrappedListeners;
   private Location latest;
   private Location mostAccurate;
 
@@ -33,6 +35,7 @@ public class LocationListener {
     acceptableErrorMeter = config.acceptableErrorMeter;
     onLocationChanged = new Event.PromisedRaisable<>();
     onLocationReceived = new Event.Raisable<>();
+    wrappedListeners = new ArrayList<>();
   }
 
   public void stop() {}
@@ -70,11 +73,17 @@ public class LocationListener {
 
   protected final void clearMostAccurate() {
     mostAccurate = null;
+    for (LocationListener listener : wrappedListeners) {
+      listener.clearMostAccurate();
+    }
   }
 
   protected final void clear() {
     mostAccurate = null;
     latest = null;
+    for (LocationListener listener : wrappedListeners) {
+      listener.clear();
+    }
   }
 
   protected final void newLocationReceived(Location location) {
@@ -104,14 +113,20 @@ public class LocationListener {
 
   protected final void keepLatest() {
     updateToNow(latest);
+    for (LocationListener listener : wrappedListeners) {
+      listener.keepLatest();
+    }
   }
 
   protected final void keepMostAccurate() {
-    updateToNow(mostAccurate);
+    for (LocationListener listener : wrappedListeners) {
+      listener.keepMostAccurate();
+    }
   }
 
   protected final void wrap(LocationListener listener) {
     Preconditions.isNotNull(listener);
+    wrappedListeners.add(listener);
     listener.onLocationReceived().add(new Event.ParameterRunnable<Location>() {
       @Override
       public void run(Location location) {
