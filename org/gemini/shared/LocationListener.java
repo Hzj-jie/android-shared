@@ -29,7 +29,7 @@ public class LocationListener {
   }
 
   public LocationListener(Configuration config) {
-    listenerType = getClass().getSimpleName();
+    listenerType = Debugging.classLoggingName(getClass());
     Preconditions.isNotNull(config);
     timeoutMs = config.timeoutMs;
     acceptableErrorMeter = config.acceptableErrorMeter;

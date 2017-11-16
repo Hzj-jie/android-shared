@@ -86,7 +86,7 @@ public class SensorEventListener extends SensorListener {
     for (float value : event.values) {
       result.append("{ ")
             .append(value)
-            .append("} ");
+            .append(" } ");
     }
     return result.toString();
   }
@@ -106,12 +106,13 @@ public class SensorEventListener extends SensorListener {
 
       @Override
       public void onSensorChanged(SensorEvent event) {
-        Log.i(TAG, "Event sensor " + sensorListenerType + " detected at " +
-                   System.currentTimeMillis() + ": " +
-                   SensorEventListener.toString(event));
         if (event == null) return;
         if (event.sensor.getType() != sensorType()) return;
         if (System.currentTimeMillis() - lastMs < intervalMs) return;
+        // Only logging the effective events.
+        Log.i(TAG, "Event sensor " + sensorListenerType + " detected at " +
+                   System.currentTimeMillis() + ": " +
+                   SensorEventListener.toString(event));
         lastMs = System.currentTimeMillis();
         onDetected.raise(event);
       }

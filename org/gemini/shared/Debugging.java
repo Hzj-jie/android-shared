@@ -59,4 +59,15 @@ public final class Debugging {
   public static void catchUnhandledExceptions() {
     UncaughtExceptionHandlerSetter.set();
   }
+
+  public static String classLoggingName(Class<?> clazz) {
+    if (clazz == null) return "[class] null";
+    return "[class] " + clazz.getCanonicalName();
+  }
+
+  public static String toString(Exception e) {
+    // TODO: Better string representation.
+    if (e == null) return "[exception] null";
+    return "[exception] " + e.toString();
+  }
 }

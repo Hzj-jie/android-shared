@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.Log;
 
 public final class SignificantMotionListener {
+  private static final boolean FORCE_USE_SIMULATED = true;
   private static final String TAG =
       Debugging.createTag("SignificantMotionListener");
   private final Event.Raisable<Void> onDetected;
@@ -24,7 +25,8 @@ public final class SignificantMotionListener {
       SimulatedSignificantMotionListener.Configuration config) {
     Preconditions.isNotNull(config);
     onDetected = new Event.Raisable<>();
-    if (SystemSignificantMotionListener.isSupported(config.context)) {
+    if (!FORCE_USE_SIMULATED &&
+        SystemSignificantMotionListener.isSupported(config.context)) {
       Log.i(TAG, "Use SystemSignificantMotionListener");
       systemListener = new SystemSignificantMotionListener(config.context);
       systemListener.onDetected().add(new Event.ParameterRunnable<Void>() {
