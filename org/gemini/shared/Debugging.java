@@ -1,5 +1,7 @@
 package org.gemini.shared;
 
+import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.os.Build;
 import android.util.Log;
 import java.text.DateFormat;
@@ -69,5 +71,11 @@ public final class Debugging {
     // TODO: Better string representation.
     if (e == null) return "[exception] null";
     return "[exception] " + e.toString();
+  }
+
+  public static boolean isDebugBuild(Context context) {
+    Preconditions.isNotNull(context);
+    return (context.getApplicationInfo().flags &
+            ApplicationInfo.FLAG_DEBUGGABLE) != 0;
   }
 }

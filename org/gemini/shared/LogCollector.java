@@ -14,6 +14,12 @@ public final class LogCollector {
   private static boolean started = false;
   private LogCollector() {}
 
+  public static void startInDebug(Context context) {
+    if (Debugging.isDebugBuild(context)) {
+      start(context);
+    }
+  }
+
   public static void start(Context context) {
     Preconditions.isNotNull(context);
     if (started) return;
