@@ -19,19 +19,19 @@ public final class NetworkListener {
     protected boolean wifiIsConnected = false;
     protected boolean mobileDataIsConnected = false;
 
-    public boolean wifiIsOn() {
+    public final boolean wifiIsOn() {
       return wifiIsOn;
     }
 
-    public String ssid() {
+    public final String ssid() {
       return ssid;
     }
 
-    public boolean wifiIsConnected() {
+    public final boolean wifiIsConnected() {
       return wifiIsConnected;
     }
 
-    public boolean mobileDataIsConnected() {
+    public final boolean mobileDataIsConnected() {
       return mobileDataIsConnected;
     }
 
