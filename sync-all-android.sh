@@ -8,5 +8,5 @@ do
     git pull
     cd ..
   done;
-  sleep 1m
+  sleep 10m
 done
