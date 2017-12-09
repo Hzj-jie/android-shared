@@ -1,6 +1,7 @@
 package org.gemini.shared;
 
 import android.content.Context;
+import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.os.Build;
 import android.util.Log;
@@ -71,6 +72,20 @@ public final class Debugging {
     // TODO: Better string representation.
     if (e == null) return "[exception] null";
     return "[exception] " + e.toString();
+  }
+
+  public static String toString(IntentFilter f) {
+    if (f == null) return "[IntentFilter] null";
+    StringBuilder builder = new StringBuilder();
+    builder.append("[IntentFilter ")
+           .append(f.countActions())
+           .append("] ");
+    for (int i = 0; i < f.countActions(); i++) {
+      builder.append(f.getAction(i))
+             .append(" ");
+    }
+    builder.delete(builder.length() - 1, builder.length());
+    return builder.toString();
   }
 
   public static boolean isDebugBuild(Context context) {

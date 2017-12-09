@@ -1,13 +1,12 @@
 package org.gemini.shared;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.BatteryManager;
 import android.util.Log;
 
-public final class BatteryListener {
+public final class BatteryListener extends IntentListener {
   private static final String TAG = Debugging.createTag("BatteryListener");
 
   public static class State {
@@ -80,43 +79,32 @@ public final class BatteryListener {
     }
   }
 
-  private final Context context;
-  private final BroadcastReceiver listener;
   private final Event.PromisedRaisable<State> onStateChanged;
 
   public BatteryListener(Context context) {
-    Preconditions.isNotNull(context);
-    this.context = context;
-    listener = new BroadcastReceiver() {
-      @Override
-      public void onReceive(Context context, Intent intent) {
-        if (context == null) return;
-        if (intent == null) return;
-        raise(intent.getAction() == Intent.ACTION_BATTERY_LOW);
-      }
-    };
+    super(context);
     onStateChanged = new Event.PromisedRaisable<>();
-    start();
+    raise(false);
   }
 
   public Event<State> onStateChanged() {
     return onStateChanged;
   }
 
-  public void stop() {
-    context.unregisterReceiver(listener);
+  protected String[] actions() {
+    return new String[] {
+      // Do not listen to ACTION_BATTERY_CHANGED to avoid battery drain.
+      // filter.addAction(Intent.ACTION_BATTERY_CHANGED);
+      Intent.ACTION_POWER_CONNECTED,
+      Intent.ACTION_POWER_DISCONNECTED,
+      Intent.ACTION_BATTERY_LOW,
+      Intent.ACTION_BATTERY_OKAY,
+    };
   }
 
-  private void start() {
-    IntentFilter filter = new IntentFilter();
-    // Do not listen to ACTION_BATTERY_CHANGED to avoid battery drain.
-    // filter.addAction(Intent.ACTION_BATTERY_CHANGED);
-    filter.addAction(Intent.ACTION_POWER_CONNECTED);
-    filter.addAction(Intent.ACTION_POWER_DISCONNECTED);
-    filter.addAction(Intent.ACTION_BATTERY_LOW);
-    filter.addAction(Intent.ACTION_BATTERY_OKAY);
-    context.registerReceiver(listener, filter);
-    raise(false);
+  protected void raise(Context context, Intent intent) {
+    Preconditions.isNotNull(intent);
+    raise(intent.getAction() == Intent.ACTION_BATTERY_LOW);
   }
 
   private static boolean powerConnected(Intent batteryStatus) {

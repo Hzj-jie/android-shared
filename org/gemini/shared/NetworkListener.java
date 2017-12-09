@@ -1,16 +1,14 @@
 package org.gemini.shared;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.util.Log;
 
-public final class NetworkListener {
+public final class NetworkListener extends IntentListener {
   private static final String TAG = Debugging.createTag("NetworkListener");
 
   public static class State {
@@ -58,32 +56,27 @@ public final class NetworkListener {
     }
   }
 
-  private final Context context;
-  private final Listener listener;
   private final Event.PromisedRaisable<State> onStateChanged;
 
   public NetworkListener(Context context) {
-    Preconditions.isNotNull(context);
-    this.context = context;
-    listener = new Listener(this);
+    super(context);
     onStateChanged = new Event.PromisedRaisable<>();
-    start();
+    raise();
   }
 
   public Event<State> onStateChanged() {
     return onStateChanged;
   }
 
-  public void stop() {
-    context.unregisterReceiver(listener);
+  protected String[] actions() {
+    return new String[] {
+      WifiManager.NETWORK_STATE_CHANGED_ACTION,
+      WifiManager.WIFI_STATE_CHANGED_ACTION,
+      ConnectivityManager.CONNECTIVITY_ACTION,
+    };
   }
 
-  private void start() {
-    IntentFilter filter = new IntentFilter();
-    filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
-    filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
-    filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
-    context.registerReceiver(listener, filter);
+  protected void raise(Context context, Intent intent) {
     raise();
   }
 
@@ -116,22 +109,5 @@ public final class NetworkListener {
     }
 
     onStateChanged.raise(state);
-  }
-
-  private static final class Listener extends BroadcastReceiver {
-    private final NetworkListener owner;
-
-    public Listener(NetworkListener owner) {
-      Preconditions.isNotNull(owner);
-      this.owner = owner;
-    }
-
-    @Override
-    public void onReceive(Context context, Intent intent) {
-      if (context == null) return;
-      if (intent == null) return;
-      Log.i(TAG, "Receive action " + intent.getAction());
-      owner.raise();
-    }
   }
 }
