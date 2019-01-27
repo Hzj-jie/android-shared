@@ -12,6 +12,7 @@ public final class Preconditions {
       return true;
     }
 
+    Log.e(TAG, "Assertion failed: " + msg);
     throw new AssertionError("Assertion failed: " + msg);
   }
 
