@@ -25,6 +25,10 @@ public final class Debugging {
     return result.substring(0, TAG_LEN);
   }
 
+  public static String createTag(Class<?> clazz) {
+    return createTag(clazz.getSimpleName());
+  }
+
   public static String stackTrace() {
     return Log.getStackTraceString(new Exception());
   }
