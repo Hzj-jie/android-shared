@@ -4,8 +4,10 @@ import android.annotation.TargetApi;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.Context;
+import android.util.Log;
 
 public final class Notifier {
+  private static final String TAG = Debugging.createTag("Notifier");
   private static int notificationId = 0;
   private final Context context;
 
@@ -32,6 +34,11 @@ public final class Notifier {
       this.whenMs = whenMs;
       return this;
     }
+
+    @Override
+    public String toString() {
+      return "icon: " + icon + ", text: " + text + ", whenMs: " + whenMs;
+    }
   }
 
   public Notifier(Context context) {
@@ -49,6 +56,7 @@ public final class Notifier {
     notificationId++;
     Notification notification =
         new Notification(config.icon, config.text, config.whenMs);
+    Log.w(TAG, config + ": " + notification + "@" + id);
     manager().notify(id, notification);
     return id;
   }
