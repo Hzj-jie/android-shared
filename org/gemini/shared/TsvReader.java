@@ -36,7 +36,6 @@ public final class TsvReader implements AutoCloseable, Closeable {
       if (line == null) {
         return null;
       }
-      line = line.trim();
       if (!line.startsWith("#")) {
         break;
       }
